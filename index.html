@@ -23,12 +23,40 @@
 
   <script>
     // Step 1: Initialize map
-    var map = L.map('map').setView([17.385044, 78.486671], 12); // Default to Hyderabad
+    var map = L.map('map').setView([17.385044, 78.486671], 12); // Default center
 
     // Step 2: Add OpenStreetMap layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
+
+    // ✅ Step 3: Add transformer markers here
+    var transformers = [
+      { name: "Transformer 1", lat: 17.385, lng: 78.486, status: "healthy" },
+      { name: "Transformer 2", lat: 17.400, lng: 78.480, status: "warning" },
+      { name: "Transformer 3", lat: 17.395, lng: 78.500, status: "fault" }
+    ];
+
+    function getColor(status) {
+      if (status === "healthy") return "green";
+      if (status === "warning") return "orange";
+      if (status === "fault") return "red";
+      return "blue";
+    }
+
+    transformers.forEach(t => {
+      L.circleMarker([t.lat, t.lng], {
+        radius: 10,
+        fillColor: getColor(t.status),
+        color: "#000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+      }).addTo(map)
+        .bindPopup(`<b>${t.name}</b><br>Status: ${t.status}`);
+    });
   </script>
 </body>
 </html>
+
+
