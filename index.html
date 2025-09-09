@@ -30,13 +30,7 @@
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // ✅ Step 3: Add transformer markers here
-    var transformers = [
-      { name: "Transformer 1", lat: 17.385, lng: 78.486, status: "healthy" },
-      { name: "Transformer 2", lat: 17.400, lng: 78.480, status: "warning" },
-      { name: "Transformer 3", lat: 17.395, lng: 78.500, status: "fault" }
-    ];
-
+    // Step 3: Function to decide marker color based on status
     function getColor(status) {
       if (status === "healthy") return "green";
       if (status === "warning") return "orange";
@@ -44,19 +38,31 @@
       return "blue";
     }
 
-    transformers.forEach(t => {
-      L.circleMarker([t.lat, t.lng], {
-        radius: 10,
-        fillColor: getColor(t.status),
-        color: "#000",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8
-      }).addTo(map)
-        .bindPopup(`<b>${t.name}</b><br>Status: ${t.status}`);
-    });
+    // Step 4: Fetch live data from ThingSpeak
+    var url = "https://api.thingspeak.com/channels/3023761/feeds.json?results=10&api_key=SYX2T5A7ECIHI6F3";
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        data.feeds.forEach(feed => {
+          let lat = parseFloat(feed.field1);   // Field1 = Latitude
+          let lng = parseFloat(feed.field2);   // Field2 = Longitude
+          let status = feed.field3;            // Field3 = Transformer Status
+
+          if (!isNaN(lat) && !isNaN(lng)) { // Only plot valid coordinates
+            L.circleMarker([lat, lng], {
+              radius: 10,
+              fillColor: getColor(status),
+              color: "#000",
+              weight: 1,
+              opacity: 1,
+              fillOpacity: 0.8
+            }).addTo(map)
+              .bindPopup(`<b>Transformer</b><br>Lat: ${lat}<br>Lng: ${lng}<br>Status: ${status}`);
+          }
+        });
+      })
+      .catch(err => console.error("ThingSpeak Fetch Error:", err));
   </script>
 </body>
 </html>
-
-
